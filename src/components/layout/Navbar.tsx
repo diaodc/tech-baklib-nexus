@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Cpu } from 'lucide-react';
 
 const navLinks = [
   { name: 'Home', href: '#home' },
@@ -29,23 +29,24 @@ export const Navbar = () => {
       className={cn(
         'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
         isScrolled 
-          ? 'bg-white/90 backdrop-blur-md shadow-sm dark:bg-gray-900/90' 
+          ? 'bg-black/80 backdrop-blur-md border-b border-gray-800' 
           : 'bg-transparent'
       )}
     >
-      <div className="container-custom py-4">
+      <div className="container-custom py-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <a href="#" className="text-2xl font-bold gradient-text">Tech<span className="font-light">Nexus</span></a>
+            <Cpu className="h-6 w-6 text-cyan-500 mr-2" />
+            <a href="#" className="text-2xl font-bold bg-gradient-to-r from-purple-500 via-cyan-400 to-blue-500 bg-clip-text text-transparent">TECH<span className="font-bold">NEXUS</span></a>
           </div>
           
           {/* Desktop Menu */}
-          <nav className="hidden md:flex space-x-8">
+          <nav className="hidden md:flex space-x-10">
             {navLinks.map((link) => (
               <a 
                 key={link.name} 
                 href={link.href} 
-                className="text-gray-700 hover:text-brand-600 font-medium transition-colors dark:text-gray-200 dark:hover:text-brand-400"
+                className="text-gray-300 hover:text-cyan-400 font-medium transition-colors text-lg"
               >
                 {link.name}
               </a>
@@ -53,34 +54,34 @@ export const Navbar = () => {
           </nav>
           
           <div className="hidden md:block">
-            <Button className="bg-gradient-to-r from-brand-600 to-teal-500 hover:from-brand-700 hover:to-teal-600">
+            <Button className="bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white px-6 py-2 rounded-lg text-base shadow-lg shadow-purple-500/25">
               Get Started
             </Button>
           </div>
           
           {/* Mobile Menu Button */}
           <button 
-            className="md:hidden p-2 text-gray-700 dark:text-gray-200"
+            className="md:hidden p-2 text-gray-300"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
         
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <nav className="md:hidden py-4 mt-2 space-y-3">
+          <nav className="md:hidden py-6 mt-2 space-y-4 border-t border-gray-800">
             {navLinks.map((link) => (
               <a 
                 key={link.name} 
                 href={link.href} 
-                className="block py-2 text-gray-700 hover:text-brand-600 font-medium transition-colors dark:text-gray-200 dark:hover:text-brand-400"
+                className="block py-2 text-gray-300 hover:text-cyan-400 font-medium transition-colors text-lg"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {link.name}
               </a>
             ))}
-            <Button className="w-full mt-2 bg-gradient-to-r from-brand-600 to-teal-500 hover:from-brand-700 hover:to-teal-600">
+            <Button className="w-full mt-4 bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600 text-white">
               Get Started
             </Button>
           </nav>
