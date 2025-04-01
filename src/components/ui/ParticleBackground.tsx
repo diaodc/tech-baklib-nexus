@@ -8,6 +8,10 @@ interface Particle {
   speedX: number;
   speedY: number;
   color: string;
+  pulse: boolean;
+  pulseSpeed: number;
+  pulseSize: number;
+  originalSize: number;
 }
 
 export const ParticleBackground = () => {
@@ -22,6 +26,9 @@ export const ParticleBackground = () => {
     
     let animationFrameId: number;
     let particles: Particle[] = [];
+    let mouseX = 0;
+    let mouseY = 0;
+    let interactionRadius = 150;
     
     // Set canvas to full screen
     const resizeCanvas = () => {
@@ -30,24 +37,42 @@ export const ParticleBackground = () => {
       initParticles();
     };
     
+    // Track mouse movement
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+    };
+    
     window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('mousemove', handleMouseMove);
     resizeCanvas();
     
     // Initialize particles
     function initParticles() {
       particles = [];
-      const particleCount = Math.floor(window.innerWidth * window.innerHeight / 9000);
+      const particleCount = Math.floor(window.innerWidth * window.innerHeight / 8000);
       
-      const colors = ['#4F46E5', '#06B6D4', '#10B981', '#3B82F6', '#8B5CF6'];
+      const colors = [
+        '#4F46E5', // Indigo
+        '#06B6D4', // Cyan
+        '#8B5CF6', // Purple
+        '#3B82F6', // Blue
+        '#EC4899', // Pink
+      ];
       
       for (let i = 0; i < particleCount; i++) {
+        const size = Math.random() * 2.5 + 1;
         particles.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          size: Math.random() * 2 + 1,
-          speedX: (Math.random() - 0.5) * 0.5,
-          speedY: (Math.random() - 0.5) * 0.5,
-          color: colors[Math.floor(Math.random() * colors.length)]
+          size: size,
+          originalSize: size,
+          speedX: (Math.random() - 0.5) * 0.7,
+          speedY: (Math.random() - 0.5) * 0.7,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          pulse: Math.random() > 0.7,
+          pulseSpeed: Math.random() * 0.05 + 0.01,
+          pulseSize: Math.random() * 1.5 + 1
         });
       }
     }
@@ -63,9 +88,10 @@ export const ParticleBackground = () => {
           const distance = Math.sqrt(dx * dx + dy * dy);
           
           if (distance < maxDistance) {
+            const opacity = 1 - (distance / maxDistance);
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(120, 180, 255, ${1 - distance / maxDistance})`;
-            ctx.lineWidth = 0.5;
+            ctx.strokeStyle = `rgba(120, 180, 255, ${opacity * 0.3})`;
+            ctx.lineWidth = 0.6;
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
             ctx.stroke();
@@ -74,14 +100,40 @@ export const ParticleBackground = () => {
       }
     }
     
+    // Mouse interaction effect
+    function handleMouseInteraction() {
+      for (const particle of particles) {
+        const dx = mouseX - particle.x;
+        const dy = mouseY - particle.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        
+        if (distance < interactionRadius) {
+          const force = (interactionRadius - distance) / interactionRadius;
+          const directionX = dx / distance || 0;
+          const directionY = dy / distance || 0;
+          
+          // Push particles away from mouse
+          particle.x -= directionX * force * 2;
+          particle.y -= directionY * force * 2;
+        }
+      }
+    }
+    
     // Animation loop
     function animate() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      handleMouseInteraction();
       
       // Update and draw particles
       for (const particle of particles) {
         particle.x += particle.speedX;
         particle.y += particle.speedY;
+        
+        // Pulsating effect
+        if (particle.pulse) {
+          particle.size = particle.originalSize + Math.sin(Date.now() * particle.pulseSpeed) * particle.pulseSize;
+        }
         
         // Wrap around edges
         if (particle.x > canvas.width) particle.x = 0;
@@ -89,10 +141,14 @@ export const ParticleBackground = () => {
         if (particle.y > canvas.height) particle.y = 0;
         else if (particle.y < 0) particle.y = canvas.height;
         
+        // Draw particles with glow effect
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = particle.color;
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
         ctx.fillStyle = particle.color;
         ctx.fill();
+        ctx.shadowBlur = 0;
       }
       
       connectParticles();
@@ -105,6 +161,7 @@ export const ParticleBackground = () => {
     // Cleanup
     return () => {
       window.removeEventListener('resize', resizeCanvas);
+      window.removeEventListener('mousemove', handleMouseMove);
       cancelAnimationFrame(animationFrameId);
     };
   }, []);
