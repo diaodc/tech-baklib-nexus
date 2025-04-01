@@ -32,6 +32,7 @@ export const ParticleBackground = () => {
     
     // Set canvas to full screen
     const resizeCanvas = () => {
+      if (!canvas) return;
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
       initParticles();
@@ -50,6 +51,8 @@ export const ParticleBackground = () => {
     // Initialize particles
     function initParticles() {
       particles = [];
+      if (!canvas) return;
+      
       const particleCount = Math.floor(window.innerWidth * window.innerHeight / 8000);
       
       const colors = [
@@ -79,6 +82,8 @@ export const ParticleBackground = () => {
     
     // Connect particles with lines
     function connectParticles() {
+      if (!ctx || !canvas) return;
+      
       const maxDistance = 150;
       
       for (let i = 0; i < particles.length; i++) {
@@ -121,6 +126,8 @@ export const ParticleBackground = () => {
     
     // Animation loop
     function animate() {
+      if (!ctx || !canvas) return;
+      
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
       handleMouseInteraction();
@@ -141,14 +148,16 @@ export const ParticleBackground = () => {
         if (particle.y > canvas.height) particle.y = 0;
         else if (particle.y < 0) particle.y = canvas.height;
         
-        // Draw particles with glow effect
-        ctx.shadowBlur = 6;
-        ctx.shadowColor = particle.color;
-        ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fillStyle = particle.color;
-        ctx.fill();
-        ctx.shadowBlur = 0;
+        // Draw particles with glow effect - Adding additional check to ensure valid size
+        if (particle.size > 0) {
+          ctx.shadowBlur = 6;
+          ctx.shadowColor = particle.color;
+          ctx.beginPath();
+          ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+          ctx.fillStyle = particle.color;
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
       }
       
       connectParticles();
@@ -156,7 +165,10 @@ export const ParticleBackground = () => {
       animationFrameId = requestAnimationFrame(animate);
     }
     
-    animate();
+    // Start the animation only when canvas is ready
+    if (canvas.width > 0 && canvas.height > 0) {
+      animate();
+    }
     
     // Cleanup
     return () => {
